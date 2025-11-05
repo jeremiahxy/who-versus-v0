@@ -4,6 +4,7 @@ import { NextResponse } from "next/server";
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get("code");
+  const type = searchParams.get("type");
   const next = searchParams.get("next") ?? "/";
 
   if (code) {
@@ -22,6 +23,15 @@ export async function GET(request: Request) {
       } else {
         return NextResponse.redirect(`${origin}${next}`);
       }
+    }
+    
+    // If there was an error but this is an email confirmation (signup type),
+    // redirect to login with a success message since the email is verified
+    if (error && type === "signup") {
+      console.log("Email verified but session creation failed, redirecting to login");
+      return NextResponse.redirect(
+        `${origin}/auth/login?message=Email confirmed! Please log in to continue.`
+      );
     }
   }
 

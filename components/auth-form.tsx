@@ -1,14 +1,15 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
 interface AuthFormProps {
   mode: "login" | "signup";
+  searchParams?: Promise<{ message?: string }>;
 }
 
-export function AuthForm({ mode }: AuthFormProps) {
+export function AuthForm({ mode, searchParams }: AuthFormProps) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [displayName, setDisplayName] = useState("");
@@ -17,6 +18,17 @@ export function AuthForm({ mode }: AuthFormProps) {
   const [message, setMessage] = useState<string | null>(null);
   const router = useRouter();
   const supabase = createClient();
+  
+  // Handle URL message parameter
+  useEffect(() => {
+    if (searchParams) {
+      searchParams.then(params => {
+        if (params.message) {
+          setMessage(params.message);
+        }
+      });
+    }
+  }, [searchParams]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
