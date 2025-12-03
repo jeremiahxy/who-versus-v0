@@ -8,6 +8,16 @@ import { cookies } from 'next/headers'
 export async function createClient() {
   const cookieStore = await cookies()
 
+  // Debug: Log what cookies are available
+  const allCookies = cookieStore.getAll();
+  const authCookie = allCookies.find(c => c.name.includes('auth-token'));
+  console.log('[supabase/server] createClient() called:', {
+    totalCookies: allCookies.length,
+    hasAuthCookie: !!authCookie,
+    authCookieName: authCookie?.name,
+    authCookieLength: authCookie?.value?.length,
+  });
+
   return createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,

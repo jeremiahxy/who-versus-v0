@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { Home, Plus } from "lucide-react";
-import { cn } from "@/lib/utils";
 import { LogoutButton } from "./logout-button";
 
 export function Navigation() {

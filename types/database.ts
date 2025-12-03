@@ -18,7 +18,8 @@ export interface Player {
 export interface Versus {
   id: string // UUID
   name: string
-  reverse_ranking: boolean
+  type: string | null // Type: 'Scavenger Hunt', 'Fitness Challenge', 'Chore Competition', 'Swear Jar', 'Other'
+  reverse_ranking: boolean // If true, lowest score ranks #1
   created_by: string // UUID referencing players
   created_at: string // ISO timestamp
   updated_at: string // ISO timestamp
@@ -29,6 +30,7 @@ export interface VersusPlayer {
   versus_id: string // UUID referencing versus
   player_id: string // UUID referencing players
   is_commissioner: boolean
+  nickname: string | null // Optional: Versus-specific nickname. If null, use player's display_name
   joined_at: string // ISO timestamp
   updated_at: string // ISO timestamp
 }
@@ -36,8 +38,9 @@ export interface VersusPlayer {
 export interface Objective {
   id: string // UUID
   versus_id: string // UUID referencing versus
-  name: string
-  points: number
+  title: string // Objective title (e.g., "Run 5 miles")
+  points: number // Can be positive or negative (e.g., +10 or -5)
+  description: string | null // Optional explanation of the objective
   created_at: string // ISO timestamp
   updated_at: string // ISO timestamp
 }
@@ -149,7 +152,7 @@ export type InsertCompletion = Omit<Completion, 'id' | 'completed_at'>
  * Update types (only updateable fields)
  */
 export type UpdatePlayer = Partial<Pick<Player, 'display_name'>>
-export type UpdateVersus = Partial<Pick<Versus, 'name' | 'reverse_ranking'>>
-export type UpdateVersusPlayer = Partial<Pick<VersusPlayer, 'is_commissioner'>>
-export type UpdateObjective = Partial<Pick<Objective, 'name' | 'points'>>
+export type UpdateVersus = Partial<Pick<Versus, 'name' | 'type' | 'reverse_ranking'>>
+export type UpdateVersusPlayer = Partial<Pick<VersusPlayer, 'is_commissioner' | 'nickname'>>
+export type UpdateObjective = Partial<Pick<Objective, 'title' | 'points' | 'description'>>
 

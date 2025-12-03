@@ -55,4 +55,5 @@ next-env.d.ts
 .cursorindexingignore
 .specstory/
 .cursor/
+.specify/
 

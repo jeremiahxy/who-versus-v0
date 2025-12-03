@@ -13,7 +13,7 @@ export default function VersusPage({ params }: { params: Promise<{ id: string }>
   const [historyOpen, setHistoryOpen] = useState(true);
   const [selectedPlayer, setSelectedPlayer] = useState<string | null>(null);
   const [selectedPlayerHistory, setSelectedPlayerHistory] = useState<HistoryEntry[]>([]);
-  const [versusData, setVersusData] = useState<any>(null);
+  const [versusData, setVersusData] = useState<Awaited<ReturnType<typeof getVersusById>>["data"] | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -38,7 +38,7 @@ export default function VersusPage({ params }: { params: Promise<{ id: string }>
       if (selectedPlayer && versusData) {
         // Find the player ID from the scoreboard
         const player = versusData.scoreboard.find(
-          (p: any) => p.display_name === selectedPlayer
+          (p) => p.display_name === selectedPlayer
         );
         
         if (player) {
@@ -186,11 +186,11 @@ export default function VersusPage({ params }: { params: Promise<{ id: string }>
                     </tr>
                   </thead>
                   <tbody>
-                    {versusData.scoreboard.map((player: any, index: number) => {
+                    {versusData.scoreboard.map((player, index: number) => {
                       const playerScoreColor = getScoreColor(player.score);
                       const playerRankColor = getRankColor(player.rank, versusData.totalPlayers);
                       const playerName = player.display_name || player.email.split('@')[0];
-                      const isCurrentUser = index === versusData.scoreboard.findIndex((p: any) => 
+                      const isCurrentUser = index === versusData.scoreboard.findIndex((p) => 
                         p.rank === versusData.currentPlayerRank && p.score === versusData.currentPlayerScore
                       );
                       const isClickable = !isCurrentUser;

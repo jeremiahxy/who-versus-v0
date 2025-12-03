@@ -44,6 +44,7 @@ export default async function Home() {
                   score={v.current_player_score}
                   rank={v.current_player_rank}
                   totalPlayers={v.total_players}
+                  isCommissioner={v.is_commissioner}
                 />
               ))}
             </div>

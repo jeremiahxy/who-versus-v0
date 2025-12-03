@@ -20,7 +20,8 @@ CREATE TABLE IF NOT EXISTS players (
 CREATE TABLE IF NOT EXISTS versus (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   name TEXT NOT NULL,
-  reverse_ranking BOOLEAN DEFAULT FALSE NOT NULL,
+  type VARCHAR(50), -- Type: 'Scavenger Hunt', 'Fitness Challenge', 'Chore Competition', 'Swear Jar', 'Other'
+  reverse_ranking BOOLEAN DEFAULT FALSE NOT NULL, -- If true, lowest score ranks #1 (for penalty-based games)
   created_by UUID REFERENCES players(id) ON DELETE CASCADE NOT NULL,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW() NOT NULL,
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW() NOT NULL
@@ -33,6 +34,7 @@ CREATE TABLE IF NOT EXISTS versus_players (
   versus_id UUID REFERENCES versus(id) ON DELETE CASCADE NOT NULL,
   player_id UUID REFERENCES players(id) ON DELETE CASCADE NOT NULL,
   is_commissioner BOOLEAN DEFAULT FALSE NOT NULL,
+  nickname VARCHAR(50), -- Optional: Versus-specific nickname override. If NULL, use player's display_name
   joined_at TIMESTAMP WITH TIME ZONE DEFAULT NOW() NOT NULL,
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW() NOT NULL,
   UNIQUE(versus_id, player_id)
@@ -43,8 +45,9 @@ CREATE TABLE IF NOT EXISTS versus_players (
 CREATE TABLE IF NOT EXISTS objectives (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   versus_id UUID REFERENCES versus(id) ON DELETE CASCADE NOT NULL,
-  name TEXT NOT NULL,
-  points INTEGER NOT NULL,
+  title TEXT NOT NULL, -- Objective title (e.g., "Run 5 miles")
+  points INTEGER NOT NULL, -- Can be positive or negative (e.g., +10 or -5)
+  description TEXT, -- Optional explanation of the objective
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW() NOT NULL,
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW() NOT NULL
 );
@@ -214,9 +217,20 @@ CREATE POLICY "Users can view their own versus_players records"
     OR is_user_in_versus(versus_id)
   );
 
-CREATE POLICY "Commissioners can add players to versus"
+-- Allow versus creators to add players (including themselves) 
+-- OR allow commissioners to add additional players
+-- Note: Creators need this to add themselves as the first commissioner
+CREATE POLICY "Versus creators and commissioners can add players"
   ON versus_players FOR INSERT
   WITH CHECK (
+    -- Allow the creator of the versus to add players
+    EXISTS (
+      SELECT 1 FROM versus
+      WHERE id = versus_id
+      AND created_by = auth.uid()
+    )
+    OR
+    -- Allow existing commissioners to add players
     is_user_commissioner(versus_id)
   );
 
