@@ -191,30 +191,6 @@ export default function ObjectivesPage() {
     );
   }
 
-  // Success state - brief celebration before redirect
-  if (showSuccess) {
-    return (
-      <div className="flex items-center justify-center py-12">
-        <div className="text-center">
-          <div className="mx-auto w-16 h-16 rounded-full bg-neon-green/20 flex items-center justify-center">
-            <svg className="w-8 h-8 text-neon-green" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-            </svg>
-          </div>
-          <h2 className="mt-4 text-2xl font-bold text-neon-green neon-text font-display">
-            Versus Created!
-          </h2>
-          <p className="mt-2 text-muted-foreground">
-            &ldquo;{versusData?.name}&rdquo; has been created successfully.
-          </p>
-          <p className="mt-2 text-sm text-muted-foreground">
-            Redirecting...
-          </p>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <>
       {/* Step 3 Form */}
