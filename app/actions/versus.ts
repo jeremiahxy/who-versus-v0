@@ -47,20 +47,29 @@ export async function getUserVersus() {
   }
 
   // Get rankings for each versus
+  type VersusObject = {
+    id: string;
+    name: string;
+    reverse_ranking: boolean;
+    created_by: string;
+    created_at: string;
+    updated_at: string;
+  };
+  
   type VersusPlayerWithVersus = {
     is_commissioner: boolean;
-    versus: {
-      id: string;
-      name: string;
-      reverse_ranking: boolean;
-      created_by: string;
-      created_at: string;
-      updated_at: string;
-    } | null;
+    versus: VersusObject | VersusObject[] | null;
+  };
+  
+  // Helper to extract versus object (handles both single object and array cases)
+  // Supabase may return foreign key relationships as arrays even for one-to-one relationships
+  const getVersusFromData = (vp: VersusPlayerWithVersus): VersusObject | null => {
+    if (!vp.versus) return null;
+    return Array.isArray(vp.versus) ? vp.versus[0] || null : vp.versus;
   };
   
   const versusIds = (versusData as VersusPlayerWithVersus[])
-    .map((vp) => vp.versus?.id)
+    .map((vp) => getVersusFromData(vp)?.id)
     .filter((id): id is string => Boolean(id));
 
   if (versusIds.length === 0) {
@@ -79,9 +88,9 @@ export async function getUserVersus() {
 
   // Combine the data
   const versusWithStats: (VersusWithStats & { is_commissioner: boolean })[] = (versusData as VersusPlayerWithVersus[])
-    .filter((vp) => vp.versus)
     .map((vp) => {
-      const versus = vp.versus!;
+      const versus = getVersusFromData(vp);
+      if (!versus) return null;
       const ranking = rankings?.find((r) => r.versus_id === versus.id);
 
       return {
@@ -91,7 +100,8 @@ export async function getUserVersus() {
         total_players: ranking?.total_players || 1,
         is_commissioner: vp.is_commissioner || false,
       };
-    });
+    })
+    .filter((v): v is VersusWithStats & { is_commissioner: boolean } => v !== null);
 
   return { data: versusWithStats, error: null };
 }
